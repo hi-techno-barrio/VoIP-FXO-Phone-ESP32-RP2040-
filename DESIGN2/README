@@ -88,3 +88,5 @@ Serial.println() - This function is used to print text on the serial console.
               |  20x4 LCD|
               +-----------+
 The microphone is connected to the signal conditioner, which is then connected to the ADC pin of the ESP32. The PWM pins of the ESP32 are connected to the PAM4803 amplifier, which then drives the speakers. The Serial Enabled 20x4 LCD is connected to the ESP32's serial port.
+
+
