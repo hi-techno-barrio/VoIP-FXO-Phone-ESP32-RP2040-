@@ -1,0 +1,53 @@
+Here is a summary of the features included in the updated code:
+
+Support for interrupt-driven ADC for audio input.
+Use of DMA for audio input and output to reduce CPU load and improve timing accuracy.
+Support for echo cancellation to improve audio quality.
+Dynamic jitter buffer to improve audio quality in the presence of network jitter.
+Support for call forwarding, conference calling, call recording, mobile and desktop app integration, custom caller ID, and auto-attendant.
+Use of a Serial Enabled 20x4 LCD display to show call state information and the current time.
+Code optimization for improved performance and reliability.
+
+Here is a description of the functions used in the source code:
+
+setup() - This function is called once at the start of the program and is used to initialize the ESP32, the PJSIP library, and the various hardware components used in the project.
+
+loop() - This function is called repeatedly after setup() and is used to handle incoming and outgoing calls, update the LCD display, and write audio data to the PWM pins for audio output.
+
+on_incoming_call() - This function is called when an incoming call is received and is used to answer the call.
+
+on_call_media_state() - This function is called when the media state of a call changes and is used to set the audio device to use the ADC for audio input and the PWM pins for audio output.
+
+on_call_state() - This function is called when the state of a call changes and is used to update the LCD display with the current call state information.
+
+adc_interrupt_handler() - This function is an interrupt service routine that is called whenever an audio sample is ready from the ADC. It stores the sample in the audio buffer and triggers audio output if the buffer is full.
+
+get_current_time() - This function returns the current time as a string in the format "YYYY-MM-DD HH:MM:SS".
+
+pj_assert() - This function is used to assert that a condition is true, and if not, it will print an error message and stop the program.
+
+pj_strerror() - This function is used to convert a PJSIP error code to a human-readable error message.
+
+pjsua_create() - This function is used to create a new PJSIP library instance.
+
+pjsua_transport_create() - This function is used to create a new PJSIP transport instance.
+
+pjsua_start() - This function is used to start the PJSIP library.
+
+pjsua_acc_add() - This function is used to add a new SIP account to the PJSIP library.
+
+pjsua_call_get_info() - This function is used to get information about a specific call.
+
+pjsua_call_answer() - This function is used to answer an incoming call.
+
+pjsua_aud_dev_set_setting() - This function is used to set the audio device settings for a specific audio device.
+
+lcd.begin() - This function is used to initialize the LCD display.
+
+lcd.setCursor() - This function is used to set the position of the cursor on the LCD display.
+
+lcd.print() - This function is used to print text on the LCD display.
+
+Serial.begin() - This function is used to initialize the serial communication port.
+
+Serial.println() - This function is used to print text on the serial console.
