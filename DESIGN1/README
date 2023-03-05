@@ -1,0 +1,42 @@
+Design summary of the features added to the VoIP code for the ESP32:
+
+Call forwarding: The enable_call_forwarding() function allows the user to forward incoming calls to a specified number or SIP URI.
+Conference calling: The on_call_conference() function enables the user to join multiple calls into a conference call.
+Call recording: The start_call_recording() function allows the user to record calls and save them to a file.
+Mobile and desktop app integration: The send_push_notification() function allows the user to send push notifications to a mobile or desktop app to notify the user of incoming calls or other events.
+Custom caller ID: The set_caller_id() function allows the user to customize the caller ID that is displayed to the recipient of the call.
+Auto-attendant: The enable_auto_attendant() function enables auto-attendant mode, where incoming calls are automatically answered and the user is prompted to enter a code to reach a specific extension or department.
+These features are in addition to the basic VoIP functionality provided by the PJSIP library, such as making and receiving calls, managing call states, and handling audio input and output.
+
+                      +------------------+
+                      |     ESP32        |
+       +--------------+------------------+--------------+
+       |              |                  |              |
+       |              |                  |              |
+       |       +------+-----+    +-------+------+       |
+       |       |  Mic      |    | Signal        |       |
+       |       |            |    | conditioner   |       |
+       |       +------------+    +---------------+       |
+       |              |                  |              |
+       |              |                  |              |
+       |       +------+-----+    +-------+------+       |
+       |       |  ADC      |    |   PAM4803     |       |
+       |       |            |    |   Amplifier   |       |
+       |       +------------+    +---------------+       |
+       |              |                  |              |
+       |              |                  |              |
+       +-------+------+------------------+-------+  
+               |                                  |
+               |                                  |
+               |                                  |
+               |         SIP Server               |
+               |                                  |
+               |             Audio Codec          |
+               |                                  |
+               +----------------------------------+
+
+
+In this updated diagram, the microphone is connected to the ESP32 via an analog-to-digital converter (ADC), and the audio output is connected to a PAM4803 amplifier for improved sound quality. The signal conditioner is used to enhance the quality of the audio signal before it is processed by the ADC. The rest of the diagram remains the same as before, with the ESP32 communicating with a SIP server over the network to facilitate VoIP communication using the PJSIP library. The SIP server uses an audio codec to encode and decode the audio data, and can communicate with mobile and desktop apps using push notifications.
+
+
+
