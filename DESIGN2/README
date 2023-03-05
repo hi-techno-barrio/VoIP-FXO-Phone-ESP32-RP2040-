@@ -51,3 +51,40 @@ lcd.print() - This function is used to print text on the LCD display.
 Serial.begin() - This function is used to initialize the serial communication port.
 
 Serial.println() - This function is used to print text on the serial console.
+
+
+
+
+
+
+              +-----------+
+              |  Micro-   |
+              |  phone    |
+              +-----------+
+                    |
+                    |
+                    |
+              +-----------+
+              |  Signal   |
+              |  Condi-   |
+              |  tioner  |
+              +-----------+
+                    |
+                    |
+                    |
+    +-----------+   |   +-----------+
+    |           |-------|           |
+    |           |       |           |
+    | ESP32     |       | PAM4803   |
+    |           |       | Amplifier |
+    |           |-------|           |
+    +-----------+   |   +-----------+
+                    |
+                    |
+                    |
+              +-----------+
+              |  Serial   |
+              |  Enabled  |
+              |  20x4 LCD|
+              +-----------+
+The microphone is connected to the signal conditioner, which is then connected to the ADC pin of the ESP32. The PWM pins of the ESP32 are connected to the PAM4803 amplifier, which then drives the speakers. The Serial Enabled 20x4 LCD is connected to the ESP32's serial port.
