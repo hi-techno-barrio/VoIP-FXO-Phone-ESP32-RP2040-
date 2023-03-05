@@ -1,3 +1,106 @@
+
+Design 3 Lists of Features
+
+Microphone input with signal conditioning
+PAM4803 amplifier output to drive speakers
+Serial-enabled LCD display to monitor caller ID and time of call
+Web server for custom network configuration (IP, subnet mask, default gateway, primary and secondary DNS)
+SIP client for VoIP phone calls
+Call forwarding feature for incoming calls
+Conference calling feature to allow multiple people to participate in a call
+Call recording feature to record the call audio
+Mobile and desktop app integration for easy access and use
+Custom caller ID for outgoing calls
+Auto-attendant feature to play pre-recorded messages and route calls to specific extensions
+Echo cancellation to improve audio quality during calls.
+
+
+The functions used in the source code and their descriptions:
+
+setup() - initializes the ESP32, sets up the audio input, initializes the LCD, sets up the web server, and registers the callback functions for incoming calls, call media state, and call state.
+
+loop() - checks for any incoming web requests and handles them, and checks if there is any audio data in the audio buffer and sends it to the output.
+
+on_incoming_call() - callback function that is called when there is an incoming call. It checks if there are too many active calls, and if not, it answers the call and sets the audio settings.
+
+on_call_media_state() - callback function that is called when the media state of a call changes. It connects the audio output to the call audio.
+
+on_call_state() - callback function that is called when the state of a call changes. It updates the LCD with the call status.
+
+adc_interrupt_handler() - interrupt handler for the ADC. It reads the audio data from the microphone and stores it in the audio buffer.
+
+get_current_time() - gets the current time as a string.
+
+handle_root() - handles the root web request, which displays the network settings form.
+
+handle_submit() - handles the submit web request, which updates the network settings.
+
+main() - the main function that sets up the program and enters the main loop.
+
+init_lcd() - initializes the LCD display.
+
+update_lcd() - updates the LCD display with the current call status.
+
+init_wifi() - initializes the WiFi connection.
+
+init_sip() - initializes the SIP client and registers the account.
+
+init_audio() - initializes the audio input and output.
+
+init_webserver() - initializes the web server.
+
+update_network_settings() - updates the network settings with the values submitted through the web form.
+
+setup_gpio() - sets up the GPIO pins for the audio output.
+
+read_audio_buffer() - reads audio data from the audio buffer and sends it to the output.
+
+connect_audio_output() - connects the audio output to the PWM channels.
+
+disconnect_audio_output() - disconnects the audio output from the PWM channels
+
+
+    +-----------------------------------------------+
+     |                 Microphone                    |
+     |                                               |
+     |          +-------------+   +-------------+    |
+     |          | Signal      |   | PAM4803     |    |
+     |          | Conditioner |   | Amplifier   |    |
+     |          +------+------+   +------+------|    |
+     |                 |                 |           |
+     |           ADC   |         PWM1, PWM2|           |
+     |                 |                 |           |
+     +--------|--------|-----------------|-----------+
+              |        |                 |
+              |        |                 |
+         +----+--------+-----+    +------+-+--------+
+         |  ESP32 Dev Board  |    | Serial LCD      |
+         |                   |    | Display         |
+         | +---------------+ |    | +------------+ |
+         | |    WiFi       | |    | |    GPIO    | | 
+         | |   Module      | |    | |    Pins    | |
+         | +---------------+ |    | +------------+ |
+         +---------|---------+    +---------------+
+                   |                      |
+                   |                      |
+              +----+----------------------+-----+
+              |  Web Server                      |
+              |                                  |
+              +----------------------------------+
+
+A summary of the different modules and their configurations:
+
+Microphone - picks up audio input and sends it to the signal conditioner.
+Signal conditioner - conditions the audio signal and sends it to the ADC input of the ESP32.
+PAM4803 amplifier - receives audio output from the PWM output of the ESP32 and amplifies it to drive speakers.
+ESP32 Dev Board - controls the system, handles the audio input/output and network connection.
+ADC - analog-to-digital converter that converts the audio signal from the microphone to a digital format for the ESP32 to process.
+PWM1, PWM2 - pulse-width modulation channels that generate audio output for the PAM4803 amplifier.
+Serial LCD Display - displays caller ID and time of call.
+WiFi Module - enables wireless connectivity for the system to connect to the network.
+Web Server - provides a web interface for the user to configure network settings such as IP address, subnet mask, gateway, primary and secondary DNS, and other settings.
+GPIO Pins - used to connect the PAM4803 amplifier and the Serial LCD Display to the ESP32.
+
 Source Code for Design 4
 - main.cpp
 - audio.cpp
