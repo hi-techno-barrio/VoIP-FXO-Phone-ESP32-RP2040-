@@ -100,7 +100,8 @@ void setup_pjsip() {
   cfg.cb.on_call_media_state = &on_call_media_state;
   cfg.cb.on_call_state = &on_call_state;
   pjsua_logging_config_default(&log_cfg);
-  pjsuamedia_cfg.clock_rate = 8000;
+  media_cfg.clock_rate = 8000;
+//  pjsuamedia_cfg.clock_rate = 8000;
 media_cfg.snd_clock_rate = 44100;
 media_cfg.ec_options = PJSUA_ECHO_USE_NOISE_SUPPRESSOR;
 pjsua_transport_config_default(&trans_cfg);
@@ -183,8 +184,7 @@ lcd.print("Idle ");
 
 if (audio_buffer_ready) {
 ledcWrite(0, audio_buffer[0]);
-ledcWrite(1, audio_buffer[
-BUFFER_THRESHOLD]);
+ledcWrite(1, audio_buffer[BUFFER_THRESHOLD]);
 for (size_t i = BUFFER_THRESHOLD; i < BUFFER_SIZE; i += 2) {
   ledcWrite(0, audio_buffer[i]);
   ledcWrite(1, audio_buffer[i + 1]);
