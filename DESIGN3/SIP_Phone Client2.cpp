@@ -87,51 +87,70 @@ void setup_wifi() {
   Serial.println("Connected");
 }
 
-// Set up PJSIP library
+void init_pjsua_config(pjsua_config* cfg) {
+  pjsua_config_default(cfg);
+  cfg->cb.on_incoming_call = &on_incoming_call;
+  cfg->cb.on_call_media_state = &on_call_media_state;
+  cfg->cb.on_call_state = &on_call_state;
+}
+
+void init_pjsua_logging_config(pjsua_logging_config* log_cfg) {
+  pjsua_logging_config_default(log_cfg);
+}
+
+void init_pjsua_media_config(pjsua_media_config* media_cfg) {
+  pjsua_media_config_default(media_cfg);
+  media_cfg->clock_rate = 8000;
+  media_cfg->snd_clock_rate = 44100;
+  media_cfg->ec_options = PJSUA_ECHO_USE_NOISE_SUPPRESSOR;
+}
+
+void init_pjsua_transport_config(pjsua_transport_config* trans_cfg) {
+  pjsua_transport_config_default(trans_cfg);
+  trans_cfg->port = port;
+  trans_cfg->tls_setting.method = PJSIP_TLSV1_0;
+  trans_cfg->tls_setting.verify_client = PJSIP_TLS_VERIFY_DISABLED;
+}
+
+void init_pjsua_acc_config(pjsua_acc_config* acc_cfg) {
+  pjsua_acc_config_default(acc_cfg);
+  acc_cfg->id = pj_str("sip:" DEFAULT_USER "@" DEFAULT_IP);
+  acc_cfg->reg_uri = pj_str("sip:" DEFAULT_IP);
+  acc_cfg->cred_count = 1;
+  acc_cfg->cred_info[0].realm = pj_str("asterisk");
+  acc_cfg->cred_info[0].scheme = pj_str("digest");
+  acc_cfg->cred_info[0].username = pj_str(DEFAULT_USER);
+  acc_cfg->cred_info[0].data_type = PJSIP_CRED_DATA_PLAIN_PASSWD;
+  acc_cfg->cred_info[0].data = pj_str(DEFAULT_PASS);
+}
+
 void setup_pjsip() {
   pjsua_config cfg;
   pjsua_logging_config log_cfg;
   pjsua_media_config media_cfg;
   pjsua_transport_config trans_cfg;
+  pjsua_acc_config acc_cfg;
 
   // Initialize PJSUA
-  pjsua_config_default(&cfg);
-  cfg.cb.on_incoming_call = &on_incoming_call;
-  cfg.cb.on_call_media_state = &on_call_media_state;
-  cfg.cb.on_call_state = &on_call_state;
-  pjsua_logging_config_default(&log_cfg);
-  media_cfg.clock_rate = 8000;
-//  pjsuamedia_cfg.clock_rate = 8000;
-  media_cfg.snd_clock_rate = 44100;
-  media_cfg.ec_options = PJSUA_ECHO_USE_NOISE_SUPPRESSOR;
-  pjsua_transport_config_default(&trans_cfg);
-  trans_cfg.port = port;
-  trans_cfg.tls_setting.method = PJSIP_TLSV1_0;
-  trans_cfg.tls_setting.verify_client = PJSIP_TLS_VERIFY_DISABLED;
+  init_pjsua_config(&cfg);
+  init_pjsua_logging_config(&log_cfg);
+  init_pjsua_media_config(&media_cfg);
+  init_pjsua_transport_config(&trans_cfg);
 
-// Initialize PJSUA
-status = pjsua_create();
-PJ_ASSERT_RETURN(status == PJ_SUCCESS, "Error initializing PJSUA",);
-pjsua_set_null_snd_dev();
-status = pjsua_init(&cfg, &log_cfg, &media_cfg);
-PJ_ASSERT_RETURN(status == PJ_SUCCESS, "Error initializing PJSUA",);
-status = pjsua_transport_create(PJSIP_TRANSPORT_UDP, &trans_cfg, NULL);
-PJ_ASSERT_RETURN(status == PJ_SUCCESS, "Error creating transport",);
-pjsua_start();
-pjsua_acc_id acc_id;
-pjsua_acc_config acc_cfg;
-pjsua_acc_config_default(&acc_cfg);
-acc_cfg.id = pj_str("sip:" DEFAULT_USER "@" DEFAULT_IP);
-acc_cfg.reg_uri = pj_str("sip:" DEFAULT_IP);
-acc_cfg.cred_count = 1;
-acc_cfg.cred_info[0].realm = pj_str("asterisk");
-acc_cfg.cred_info[0].scheme = pj_str("digest");
-acc_cfg.cred_info[0].username = pj_str(DEFAULT_USER);
-acc_cfg.cred_info[0].data_type = PJSIP_CRED_DATA_PLAIN_PASSWD;
-acc_cfg.cred_info[0].data = pj_str(DEFAULT_PASS);
-status = pjsua_acc_add(&acc_cfg, PJ_TRUE, &acc_id);
-PJ_ASSERT_RETURN(status == PJ_SUCCESS, "Error adding account",);
+  status = pjsua_create();
+  PJ_ASSERT_RETURN(status == PJ_SUCCESS, "Error initializing PJSUA",);
+  pjsua_set_null_snd_dev();
+  status = pjsua_init(&cfg, &log_cfg, &media_cfg);
+  PJ_ASSERT_RETURN(status == PJ_SUCCESS, "Error initializing PJSUA",);
+  status = pjsua_transport_create(PJSIP_TRANSPORT_UDP, &trans_cfg, NULL);
+  PJ_ASSERT_RETURN(status == PJ_SUCCESS, "Error creating transport",);
+  pjsua_start();
+  
+  init_pjsua_acc_config(&acc_cfg);
+  status = pjsua_acc_add(&acc_cfg, PJ_TRUE, &acc_id);
+  PJ_ASSERT_RETURN(status == PJ_SUCCESS, "Error adding account",);
 }
+
 
 // Set up web server
 void setup_web_server() {
