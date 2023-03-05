@@ -596,4 +596,170 @@ ledcDetachPin(PWM_RIGHT_PIN);
 // Set LCD message
 lcd.clear();
 lcd.setCursor(0, 0);
-lcd.print("Call ended
+lcd.print("Call ended// Codec settings
+#define DEFAULT_CODEC PJMEDIA_CODEC_G722
+
+// Audio buffer
+static uint8_t audio_buffer[BUFFER_SIZE];
+static size_t audio_buffer_index = 0;
+
+// Network settings
+static IPAddress ip = DEFAULT_IP;
+static uint16_t port = DEFAULT_PORT;
+static String user = DEFAULT_USER;
+static String pass = DEFAULT_PASS;
+
+// PJSIP variables
+static pjsua_acc_id acc_id;
+static pjsua_call_id call_id = PJSUA_INVALID_ID;
+static pjsip_transport_type_e transport_type = PJSIP_TRANSPORT_UDP;
+static pjsip_codec_id codec_id = DEFAULT_CODEC;
+static pjmedia_port *audio_port = NULL;
+static pjmedia_port *file_port = NULL;
+static pjmedia_snd_port *snd_port = NULL;
+
+// LCD display
+static LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+// Web server
+static WebServer server(WEB_SERVER_PORT);
+
+// Function prototypes
+void setup_wifi();
+void setup_pjsip();
+void setup_web_server();
+void setup_lcd();
+void setup();
+void loop();
+void on_incoming_call(pjsua_acc_id acc_id, pjsua_call_id call_id, pjsip_rx_data *rdata);
+void on_call_media_state(pjsua_call_id call_id);
+void on_call_state(pjsua_call_id call_id, pjsip_event *e);
+void on_file_data(pjmedia_port *port, void *user_data, pjmedia_event *event);
+void adc_interrupt_handler(void *arg);
+String get_current_time();
+void handle_root();
+void handle_submit();
+
+// Set up Wi-Fi connection
+void setup_wifi() {
+Serial.print("Connecting to Wi-Fi");
+WiFi.begin();
+while (WiFi.status() != WL_CONNECTED) {
+delay(500);
+Serial.print(".");
+}
+Serial.println("Connected");
+}
+
+// Set up PJSIP library
+void setup_pjsip() {
+// Initialize PJSUA
+pjsua_config cfg;
+pjsua_logging_config log_cfg;
+pjsua_media_config media_cfg;
+pjsua_transport_config trans_cfg;
+
+pjsua_config_default(&cfg);
+cfg.cb.on_incoming_call = &on_incoming_call;
+cfg.cb.on_call_media_state = &on_call_media_state;
+cfg.cb.on_call_state = &on_call_state;
+
+// Initialize logging
+pjsua_logging_config_default(&log_cfg);
+log_cfg.console_level = 4;
+
+// Initialize media
+pjsua_media_config_default(&media_cfg);
+media_cfg.clock_rate = 16000;
+media_cfg.snd_clock_rate = 16000;
+media_cfg.channel_count = 1;
+media_cfg.quality = 10;
+media_cfg.ec_tail_len = 0;
+media_cfg.jb_max_size = JITTER_BUFFER_SIZE;
+media_cfg.jb_init = JITTER_BUFFER_SIZE / 4;
+pjmedia_codec_g722_init(&media_cfg);
+
+// Initialize transport
+pjsua_transport_config_default(&trans_cfg);
+trans_cfg.port = port;
+
+// Initialize PJSUA
+pjsua_create();
+pjsua_init(&cfg, &log_cfg, &media_cfg);
+
+// Set the transport type
+if (transport_type == PJSIP_TRANSPORT_UDP) {
+pjsua_transport_create(PJSIP_TRANSPORT_UDP, &trans_cfg, NULL);
+} else if (transport_type == PJSIP_TRANSPORT_TCP) {
+pjsua_transport_create(PJSIP_TRANSPORT_TCP, &trans_cfg, NULL);
+} else if (transport_type == PJSIP_TRANSPORT_TLS) {// Handle root page request
+void handle_root() {
+// Set HTTP headers
+server.sendHeader("Content-Type", "text/html");
+server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+server.sendHeader("Pragma", "no-cache");
+server.sendHeader("Expires", "0");
+
+// Generate HTML page
+String html = "<!DOCTYPE html><html><head><title>ESP32 SIP Phone</title></head><body>";
+html += "<h1>ESP32 SIP Phone</h1>";
+html += "<p>IP address: " + WiFi.localIP().toString() + "</p>";
+html += "<form method='post' action='/submit'>";
+html += "<label for='ip'>Server IP:</label><br>";
+html += "<input type='text' id='ip' name='ip' value='" + ip.toString() + "'><br>";
+html += "<label for='port'>Server port:</label><br>";
+html += "<input type='number' id='port' name='port' value='" + String(port) + "'><br>";
+html += "<label for='user'>User name:</label><br>";
+html += "<input type='text' id='user' name='user' value='" + user + "'><br>";
+html += "<label for='pass'>Password:</label><br>";
+html += "<input type='password' id='pass' name='pass' value='" + pass + "'><br><br>";
+html += "<input type='submit' value='Submit'>";
+html += "</form>";
+html += "</body></html>";
+
+// Send response to client
+server.send(200, "text/html", html);
+}
+
+// Handle form submission
+void handle_submit() {
+// Get form values
+ip = IPAddress(server.arg("ip").toInt(), server.arg("ip").toInt(), server.arg("ip").toInt(), server.arg("ip").toInt());
+subnet = IPAddress(255, 255, 255, 0);
+gateway = IPAddress(ip[0], ip[1], ip[2], 1);
+dns1 = IPAddress(8, 8, 8, 8);
+dns2 = IPAddress(8, 8, 4, 4);
+port = server.arg("port").toInt();
+user = server.arg("user");
+pass = server.arg("pass");
+
+// Update LCD display
+lcd.clear();
+lcd.setCursor(0, 0);
+lcd.print("Connecting to Wi-Fi");
+
+// Connect to Wi-Fi network
+WiFi.mode(WIFI_STA);
+WiFi.config(ip, gateway, subnet, dns1, dns2);
+WiFi.begin();
+while (WiFi.status() != WL_CONNECTED) {
+delay(500);
+Serial.print(".");
+}
+
+// Update LCD display
+lcd.clear();
+lcd.setCursor(0, 0);
+lcd.print("Connected to Wi-Fi");
+lcd.setCursor(0, 1);
+lcd.print("IP: ");
+lcd.print(WiFi.localIP());
+
+// Update PJSIP settings
+setup_pjsip();
+
+// Redirect to root page
+server.sendHeader("Location", "/");
+server.send(302);
+}
+ 
