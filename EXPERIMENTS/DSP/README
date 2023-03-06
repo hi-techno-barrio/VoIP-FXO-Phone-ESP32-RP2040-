@@ -1,0 +1,40 @@
+Defines constants for the maximum analog input value, the bit depth, the exponent bias, the number of mantissa bits, and the uLaw and aLaw compound tables.
+Declares functions to compress an analog sample into uLaw and aLaw codecs using the defined constants and tables.
+Sets up the serial communication to print the output.
+In the main loop:
+Reads the analog input from pin A0.
+Calls the uLaw and aLaw compression functions on the analog sample.
+Prints the original and compressed values to the serial monitor.
+Delays for 100 milliseconds before looping again.
+
+
+                +---------------+
+                |   Microphone  |
+                +-------+-------+
+                        |
+                        V
+             +--------------+--------------+
+             |  Signal      |              |
+             |  Conditioner |              |
+             +-------+------+--------------+
+                     |    
+                     V    
+               +-----+-----+
+               |  ADC Input|
+               +-----+-----+
+                     |
+                     V
+               +-----+-----+
+               |   ESP32   |
+               +-----+-----+
+                     |
+                     V
+          +----------+----------+
+          |  Digital Signal     |
+          |     Processing      |
+          +----------+----------+
+                     |
+                     V
+              +-------+-------+
+              | Audio Codec   |
+              +---------------+
