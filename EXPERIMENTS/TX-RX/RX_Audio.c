@@ -42,7 +42,36 @@ void setup() {
 
   Serial.println("Ready to transmit audio");
 }
+uint8_t compressULaw(int16_t sample) {
+  sample = sample / 2; // Scale to 8 bits
+  sample = sample ^ 0x8000; // Flip sign bit
+  uint8_t sign = (sample & 0x8000) >> 8;
+  if (sign != 0) {
+    sample = -sample;
+  }
+  if (sample > 32635) {
+    sample = 32635;
+  }
+  sample = sample + 132;
+  uint8_t exponent = G711_EXPONENT_TABLE[(sample >> 7) & 0x7F];
+  uint8_t mantissa = (sample >> (exponent + 3)) & 0x0F;
+  return ~(sign | (exponent << 4) | mantissa);
+}
 
+uint8_t compressALaw(int16_t sample) {
+  sample = sample / 2; // Scale to 8 bits
+  sample = sample ^ 0x8000; // Flip sign bit
+  uint8_t sign = (sample & 0x8000) >> 8;
+  if (sign != 0) {
+    sample = (~sample + 1) & 0x7FFF; // Take 2's complement and clear sign bit
+  }
+  if (sample > 32123) {
+    sample = 32123;
+  }
+  uint8_t exponent = 7 - log2(sample); // Compute exponent
+  uint8_t mantissa = (sample >> (exponent + 3)) & 0x0F;
+  return ~(sign | (exponent << 4) | mantissa);
+}
 void loop() {
   // Read analog input and filter it
   int16_t analogValue = analogRead(ADC_PIN);
