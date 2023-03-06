@@ -1,0 +1,48 @@
+Transmitter VoIP
+    +------------+
+    | ESP32      |
+    |            |
+    | GPIO 34    |
+    | SPI bus    |
+    |            |
+    |   +----+   |
+    |   |Mic |   |
+    |   +----+   |
+    +------------+
+
+
+This code is an example implementation of audio streaming over UDP using an ESP32 microcontroller and the Arduino programming language. The code reads audio data from an analog input pin, applies a low-pass filter, and encodes the audio data using either the A-law or μ-law algorithm. The encoded audio data is then transmitted over a WiFi network using the User Datagram Protocol (UDP) to a remote server.
+
+The code uses the ESP32's WiFi and WiFiUdp libraries to establish a connection to a WiFi network and to create a UDP socket for sending audio data. It also defines constants for the audio sampling rate, sample size, and buffer size, and uses a low-pass filter to smooth the audio data before encoding it.
+
+The code includes tables of values used in the A-law and μ-law algorithms for encoding audio data. The A-law algorithm is used primarily in European telephone networks, while the μ-law algorithm is used in North American telephone networks.
+
+Overall, this code serves as an example of how to implement audio streaming over UDP on an ESP32 microcontroller using the Arduino programming language. It can be modified and adapted for other use cases as needed.
+
+
+Receiver VoIP
+             +------------+      +-------------+          +------------+
+Microphone-->| ADC        |      | ESP32       |<--UDP--->| Client     |
+             |            |      |             |          |            |
+             | +------+   |      | +---------+ |          | +------+   |
+             | |      |   |      | |         | |          | |      |   |
+             | |      |<--+<-----+ |         | |          | |      |   |
+             | |      |   |      | |         | |          | |      |   |
+             | |      |   |      | |         | |          | |      |   |
+             | | ADC  |   |      | |         | |          | | PAM  |   |
+             | | Pin  |   |      | | WiFi    | |          | | 4803 |<--+
+             | |      |   |      | |         | |          | |      |   |
+             | |      |   |      | |         | |          | |      |   |
+             | |      |   |      | |         | |          | |      |   |
+             | |      |<--+----->+ |         | |          | |      |   |
+             | +------+   |      | +---------+ |          | +------+   |
+             |            |      |             |          |            |
+             +------------+      +-------------+          +------------+
+
+This code implements a real-time audio streaming application using an ESP32 microcontroller board and the Arduino IDE.
+
+At the transmitting end, the code reads an analog input from a microphone and filters it, compresses it using uLaw and aLaw compression algorithms, and sends the compressed data over a UDP network to a specified IP address and port number.
+
+At the receiving end, the code listens for incoming UDP packets, reads the received samples, and plays them back through a PAM8403 amplifier and a speaker. The received samples are first decompressed from uLaw and aLaw format and then converted to PCM format before being sent to the PAM8403 amplifier.
+
+The code also includes various settings and parameters that can be adjusted, such as the sampling rate, filter coefficient, and compression ratio, to optimize the audio quality and network performance.
