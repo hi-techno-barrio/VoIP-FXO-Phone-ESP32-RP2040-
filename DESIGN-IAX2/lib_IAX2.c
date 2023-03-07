@@ -79,10 +79,32 @@ bool IAX2::receive() {
 }
 
 bool IAX2::handleIncomingCall(iaxInCall *incomingCall) {
-  // Handle the incoming call based on its state and type
-  // ...
-  return true;
+  if (incomingCall->state == IAX_INCOMING) {
+    // Incoming call - answer it
+    answerCall(incomingCall->callno);
+    return true;
+  } else if (incomingCall->state == IAX_CALL_PROCEEDING) {
+    // Call proceeding - do nothing
+    return true;
+  } else if (incomingCall->state == IAX_RINGING) {
+    // Call ringing - play ringing tone
+    playRingingTone();
+    return true;
+  } else if (incomingCall->state == IAX_CALL_ESTABLISHED) {
+    // Call established - set audio codec
+    setAudioCodec(incomingCall->callno, audioCodec);
+    return true;
+  } else if (incomingCall->state == IAX_CALL_HANGUP) {
+    // Call hangup - stop audio playback
+    stopAudioPlayback();
+    return true;
+  } else {
+    // Unknown call state - do nothing
+    return false;
+  }
 }
+
+
 
 bool IAX2::forwardCall(iaxNew *newMessage, iaxNewResponse *response, IPAddress forwardIP, int forwardPort) {
   // Forward the call to the specified IAX2 server
@@ -96,4 +118,11 @@ bool IAX2::forwardCall(iaxNew *newMessage, iaxNewResponse *response, IPAddress f
   return true;
 }
 
-void IAX2::parseHeader(iaxHeader *header
+void IAX2::parseHeader(iaxHeader *header) {
+  // Swap the byte order of the header fields
+  header->messageLength = ntohs(header->messageLength);
+  header->timestamp = ntohl(header->timestamp);
+  header->sourceCallNumber = ntohl(header->sourceCallNumber);
+  header->destinationCallNumber = ntohl(header->destinationCallNumber);
+}
+
