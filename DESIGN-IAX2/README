@@ -1,4 +1,7 @@
-The program runs on an ESP32 board and is connected to a WiFi network for communication with a web server and an IAX2 server. The ESP32 board also performs audio processing using an ADC and DAC for input and output, respectively. The program has a call button that triggers a phone call using the IAX2 protocol. The program can also enable call forwarding to a specified phone number. The web server allows the user to configure network settings. Finally, the program also uses an LCD display for caller ID and call time
+The program runs on an ESP32 board and is connected to a WiFi network for communication with a web server and an IAX2 server. The ESP32 board also performs audio 
+processing using an ADC and DAC for input and output, respectively. The program has a call button that triggers a phone call using the IAX2 protocol. The program 
+can also enable call forwarding to a specified phone number. The web server allows the user to configure network settings. Finally, the program also uses an LCD 
+display for caller ID and call time
 
                            +-----------------+
                            |   Call Button   |
