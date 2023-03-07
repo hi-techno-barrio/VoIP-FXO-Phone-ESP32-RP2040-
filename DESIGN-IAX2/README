@@ -1,0 +1,40 @@
+The program runs on an ESP32 board and is connected to a WiFi network for communication with a web server and an IAX2 server. The ESP32 board also performs audio processing using an ADC and DAC for input and output, respectively. The program has a call button that triggers a phone call using the IAX2 protocol. The program can also enable call forwarding to a specified phone number. The web server allows the user to configure network settings. Finally, the program also uses an LCD display for caller ID and call time
+
+                           +-----------------+
+                           |   Call Button   |
+                           +--------+--------+
+                                    |
+                           +--------v--------+
+                           |                 |
+                           |   ESP32 Board   |
+                           |                 |
+                           +--------+--------+
+                                    |
+                         +--------------+--------------+
+                         |                             |
+               +---------v--------+          +---------v--------+
+               |  WiFi Network    |          |   IAX2 Server    |
+               +---------+--------+          +---------+--------+
+                         |                             |
+                         |                             |
+        +----------------v---------------+   +---------v--------+
+        |   Web Server and Audio Output   |   |   Call Forwarding |
+        +----------------+---------------+   +-----------------+
+                         |
+        +----------------v----------------+
+        |   ADC and DAC Audio Processing   |
+        +----------------------------------+
+
+
+The program has the following features:
+
+Connects to a WiFi network using the provided SSID and password.
+Initializes the ADC and DAC pins for audio input and output.
+Applies a digital filter to remove noise from the audio input.
+Reads audio samples from the ADC and outputs them to the PAM4803 amplifier.
+Connects to an IAX2 server using the provided user credentials.
+Handles incoming and outgoing calls using the IAX2 protocol.
+Displays the caller ID and call duration on an LCD display.
+Provides a web interface for configuring network settings.
+Enables call forwarding to a specified number when an incoming call is received and call forwarding is enabled.
+Allows the user to place outgoing calls using a call button connected to a GPIO pin
