@@ -1,7 +1,6 @@
 #include "audio.h"
 #include <math.h>
 
-
 void AudioProcessing::filter(uint8_t *input, uint8_t *output, int inputSize, int outputSize) {
   // Implement a simple low-pass filter
   float alpha = 0.2;
@@ -15,7 +14,6 @@ void AudioProcessing::filter(uint8_t *input, uint8_t *output, int inputSize, int
     output[i+1] = (sample >> 8) & 0xFF;
   }
 }
-
 
 void AudioProcessing::amplify(uint8_t *input, uint8_t *output, int inputSize, int outputSize, float gain) {
   // Amplify the audio data
@@ -43,6 +41,16 @@ void AudioProcessing::reduceNoise(uint8_t *input, uint8_t *output, int inputSize
   }
 }
 
+class Codec {
+  public:
+    virtual const char* getName() = 0;
+    virtual int getSampleRate() = 0;
+    virtual int getBitsPerSample() = 0;
+    virtual int getBlockSize() = 0;
+    virtual void compress(uint8_t *input, uint8_t *output, int inputSize) = 0;
+    virtual void decompress(uint8_t *input, uint8_t *output, int outputSize) = 0;
+};
+
 
 class Codec {
   public:
@@ -55,39 +63,40 @@ class Codec {
 };
 
 class uLawCodec : public Codec {
-  public:
+public:
     const char* getName() { return "uLaw"; }
     int getSampleRate() { return 8000; }
     int getBitsPerSample() { return 8; }
     int getBlockSize() { return 160; }
 
     void compress(uint8_t *input, uint8_t *output, int inputSize) {
-      for (int i = 0; i < inputSize; i++) {
-        int16_t sample = ((int16_t)input[i*2]) | (((int16_t)input[i*2+1]) << 8);
-        sample = sample >> 2;
-        sample = sample ^ 0x8000;
-        if (sample < 0) {
-          sample = -sample;
-          output[i] = 0xFF ^ ((int)log2(sample) >> 3);
-        } else {
-          output[i] = 0x7F ^ ((int)log2(sample) >> 3);
+        for (int i = 0; i < inputSize; i++) {
+            int16_t sample = ((int16_t)input[i*2]) | (((int16_t)input[i*2+1]) << 8);
+            sample = sample >> 2;
+            sample = sample ^ 0x8000;
+            if (sample < 0) {
+                sample = -sample;
+                output[i] = 0xFF ^ ((int)log2((float)abs((int)sample)) >> 3);
+            } else {
+                output[i] = 0x7F ^ ((int)log2((float)abs((int)sample)) >> 3);
+            }
         }
-      }
     }
 
     void decompress(uint8_t *input, uint8_t *output, int outputSize) {
-      for (int i = 0; i < outputSize; i++) {
-        int16_t sample = 0;
-        if (input[i] & 0x80) {
-          sample = (1 << ((input[i] & 0x0F) + 3)) ^ 0x8000;
-        } else {
-          sample = ((input[i] & 0x0F) << 3) | 0x84;
+        for (int i = 0; i < outputSize; i++) {
+            int16_t sample = 0;
+            if (input[i] & 0x80) {
+                sample = (1 << ((input[i] & 0x0F) + 3)) ^ 0x8000;
+            } else {
+                sample = ((input[i] & 0x0F) << 3) | 0x84;
+            }
+            output[i*2] = sample & 0xFF;
+            output[i*2+1] = (sample >> 8) & 0xFF;
         }
-        output[i*2] = sample & 0xFF;
-        output[i*2+1] = (sample >> 8) & 0xFF;
-      }
     }
 };
+
 
 class aLawCodec : public Codec {
   public:
@@ -99,7 +108,7 @@ class aLawCodec : public Codec {
     void compress(uint8_t *input, uint8_t *output, int inputSize) {
       for (int i = 0; i < inputSize; i++) {
         int16_t sample = ((int16_t)input[i*2]) | (((int16_t)input[i*2+1]) << 8);
-        sample = sample >> 3;
+        sample = sample >> 2;
         int sign = (sample >> 8) & 0x80;
         if (sign) {
           sample = -sample;
@@ -121,7 +130,7 @@ void compress(uint8_t *input, uint8_t *output, int inputSize) {
     output[i] = linear2alaw(sample);
   }
 }
-
+}
 void decompress(uint8_t *input, uint8_t *output, int outputSize) {
   for (int i = 0; i < outputSize; i++) {
     int16_t sample = alaw2linear(input[i]);
@@ -179,21 +188,30 @@ int16_t alaw2linear(uint8_t a_val) {
 
 class uLawG711Codec : public Codec {
 public:
-const char* getName() { return "uLaw-G.711"; }
-int getSampleRate() { return 8000; }
-int getBitsPerSample() { return 8; }
-int getBlockSize() { return 160; }void compress(uint8_t *input, uint8_t *output, int inputSize) {
-  uint8_t ulawInput[inputSize];
-  uLawCodec ulaw;
-  ulaw.compress(input, ulawInput, inputSize);
+    const char* getName() { return "uLaw-G.711"; }
+    int getSampleRate() { return 8000; }
+    int getBitsPerSample() { return 8; }
+    int getBlockSize() { return 160; }
 
-  G711Codec g711;
-  g711.compress(ulawInput, output, inputSize);
-}
+    void compress(uint8_t *input, uint8_t *output, int inputSize) {
+        uint8_t ulawInput[inputSize];
+        uLawCodec ulaw;
+        ulaw.compress(input, ulawInput, inputSize);
 
-void decompress(uint8_t *input, uint8_t *output, int outputSize) {
-  uint8_t g711Input[outputSize];
-  G711Codec g711
+        G711Codec g711;
+        g711.compress(ulawInput, output, inputSize);
+    }
+
+    void decompress(uint8_t *input, uint8_t *output, int outputSize) {
+        uint8_t g711Input[outputSize];
+        G711Codec g711;
+        g711.decompress(input, g711Input, outputSize);
+
+        uLawCodec ulaw;
+        ulaw.decompress(g711Input, output, outputSize);
+    }
+};
+
 class G711Codec : public Codec {
 public:
 const char* getName() { return "G.711"; }
@@ -215,10 +233,11 @@ void decompress(uint8_t *input, uint8_t *output, int outputSize) {
     output[i*2+1] = (sample >> 8) & 0xFF;
   }
 }
+
 private:
 static int8_t linearToMuLaw(int16_t sample) {
 const int BIAS = 132;
-const int CLIP = 32635;
+const int CLIP = 32767;
 const int MULAW_MAX = 0x1F;
 int sign = (sample >> 8) & 0x80;
 if (sign) {
@@ -240,7 +259,7 @@ static int16_t muLawToLinear(int8_t encodedSample) {
   int sign = encodedSample & 0x80;
   int exponent = (encodedSample >> 4) & 0x07;
   int mantissa = encodedSample & 0x0F;
-  int decodedSample = ((mantissa << 3) | 0x84) << (exponent - 1);
+  int decodedSample = ((mantissa << 3) | 0x84) << (exponent + 3);
   decodedSample += BIAS;
   if (sign) {
     decodedSample = -decodedSample;
@@ -249,4 +268,4 @@ static int16_t muLawToLinear(int8_t encodedSample) {
 }
 };
 
-#endif // AUDIO_H
+
