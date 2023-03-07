@@ -48,3 +48,25 @@ unwanted frequencies from a signal, or to enhance certain features of a signal.
 In the code provided, a digital filter is applied to an audio sample to remove noise before it is output to a PAM4803 amplifier. This helps to improve the quality
 of the audio output.
 
+
+This is a piece of code that defines classes and methods for audio processing and audio compression. The code defines four classes that inherit from a common abstract 
+class Codec:
+
+uLawCodec - implements the u-law compression algorithm
+aLawCodec - implements the a-law compression algorithm
+G711Codec - implements the G.711 compression algorithm
+uLawG711Codec - implements u-law followed by G.711 compression
+Each codec has a compress method and a decompress method that take in input audio data and output compressed audio data and vice versa. The Codec class defines some 
+common methods that all codecs have, such as getName, getSampleRate, getBitsPerSample, and getBlockSize.
+
+The code also defines three audio processing methods:
+
+filter - implements a simple low-pass filter
+amplify - amplifies the audio data by a given gain
+reduceNoise - removes negative values from audio data
+The filter method takes in an input audio signal and outputs a filtered version of it. It implements a simple low-pass filter that smoothes the signal. The amplify
+method takes in an input audio signal and outputs a version of it that is amplified by a given gain. The reduceNoise method takes in an input audio signal and outputs
+a version of it where negative values have been removed.
+
+Overall, the code provides a simple framework for audio processing and compression. It could be extended to include other codecs and processing algorithms, and it 
+could be used as a starting point for building more complex audio applications.
