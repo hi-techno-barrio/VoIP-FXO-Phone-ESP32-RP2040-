@@ -108,3 +108,76 @@ typedef struct {
   uint8_t subclass;
   uint32_t timestamp;
   uint32_t sourceCall
+
+    
+    //Number and IP of the calling party
+uint8_t callingNumber[32];
+uint8_t callingName[32];
+uint8_t callingIP[32];
+//Codec information
+uint16_t codecPref;
+uint16_t sampleRate;
+uint16_t callingFormat;
+uint8_t callingCapabilities[32];
+//Other fields
+uint8_t cause[4];
+uint8_t privateKey[16];
+} iaxInCall;
+
+// Define the IAX2 incoming call acknowledgement message structure
+typedef struct {
+uint16_t messageLength;
+uint8_t messageType;
+uint8_t subclass;
+uint32_t timestamp;
+uint32_t sourceCallNumber;
+uint32_t destinationCallNumber;
+uint8_t reserved[12];
+uint32_t newCallNumber;
+// ... other fields ...
+} iaxInCallAck;
+
+// Define the IAX2 forward message structure
+typedef struct {
+uint16_t messageLength;
+uint8_t messageType;
+uint8_t subclass;
+uint32_t timestamp;
+uint32_t sourceCallNumber;
+uint32_t destinationCallNumber;
+uint8_t reserved[12];
+// ... other fields ...
+} iaxForward;
+
+// Define the IAX2 forward acknowledgement message structure
+typedef struct {
+uint16_t messageLength;
+uint8_t messageType;
+uint8_t subclass;
+uint32_t timestamp;
+uint32_t sourceCallNumber;
+uint32_t destinationCallNumber;
+uint8_t reserved[12];
+uint8_t forwardCode;
+// ... other fields ...
+} iaxForwardAck;
+
+class IAX2 {
+public:
+IAX2(byte mac[], IPAddress localIP, int localPort);
+bool connect(IPAddress serverIP, int serverPort);
+void disconnect();
+bool sendNew(iaxNew *newMessage, iaxNewResponse *response);
+bool sendHangup(iaxHangup *hangupMessage);
+bool sendRegReq(iaxRegReq *regReqMessage, iaxRegAck *regAckMessage);
+bool receive();
+private:
+EthernetClient client;
+byte mac[6];
+IPAddress localIP;
+int localPort;
+uint8_t iaxBuffer[IAX_BUFFER_SIZE];
+void parseHeader(iaxHeader *header);
+};
+
+#endif
