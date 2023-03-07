@@ -41,6 +41,5 @@ Allows the user to place outgoing calls using a call button connected to a GPIO 
 
 Additional: 
 Digital filters are used to process digital signals, which are discrete-time signals represented as sequences of numbers. They can be used to remove noise or unwanted frequencies from a signal, or to enhance certain features of a signal.
-
 In the code provided, a digital filter is applied to an audio sample to remove noise before it is output to a PAM4803 amplifier. This helps to improve the quality of the audio output.
 
