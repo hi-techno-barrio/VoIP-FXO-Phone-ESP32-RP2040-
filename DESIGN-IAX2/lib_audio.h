@@ -8,6 +8,13 @@ class AudioProcessing {
     static void filter(uint8_t *input, uint8_t *output, int inputSize, int outputSize);
     static void amplify(uint8_t *input, uint8_t *output, int inputSize, int outputSize, float gain);
     static void reduceNoise(uint8_t *input, uint8_t *output, int inputSize, int outputSize);
+    static void setCodec(Codec *codec);
+    static void beginRecord(uint8_t *buffer, int bufferSize);
+  
+  private:
+    static Codec *audioCodec;
+    static uint8_t *audioBuffer;
+    static int audioBufferSize;
 };
 
 class Codec {
