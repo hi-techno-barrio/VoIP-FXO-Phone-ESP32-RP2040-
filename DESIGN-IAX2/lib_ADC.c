@@ -1,33 +1,68 @@
 // ADC.cpp
 
-#include "ADC.h"
-#include <avr/io.h>
+#include "adc.h"
+
+#define ADC_REF_VOLTAGE 3300
+
+uint8_t ADC::adcResolution;
 
 void ADC::begin() {
-    // Enable ADC and set the prescaler to 128
-    ADCSRA = _BV(ADEN) | _BV(ADPS2) | _BV(ADPS1) | _BV(ADPS0);
+  // Initializes the ADC
+  ADCSRA |= (1 << ADEN);
 }
 
-void ADC::setResolution(adc_resolution_t resolution) {
-    // Set the ADC resolution
-    ADMUX = (ADMUX & ~_BV(ADLAR)) | (resolution << ADLAR);
+void ADC::setResolution(uint8_t bits) {
+  // Sets the resolution of the ADC (8, 10, 12 bits)
+  if (bits == 8) {
+    ADMUX &= ~(1 << ADLAR);
+    adcResolution = 8;
+  } else if (bits == 10) {
+    ADMUX &= ~(1 << ADLAR);
+    adcResolution = 10;
+  } else if (bits == 12) {
+    ADMUX |= (1 << ADLAR);
+    adcResolution = 12;
+  }
 }
 
-void ADC::setClockDivisor(adc_clock_div_t clockDivisor) {
-    // Set the ADC clock divisor
-    ADCSRA = (ADCSRA & ~0x07) | clockDivisor;
+void ADC::setClockDivisor(uint8_t divisor) {
+  // Sets the clock divisor for the ADC (2, 4, 8, 16, 32, 64, 128, 256)
+  if (divisor == 2) {
+    ADCSRA |= (1 << ADPS0);
+    ADCSRA &= ~(1 << ADPS1);
+    ADCSRA &= ~(1 << ADPS2);
+  } else if (divisor == 4) {
+    ADCSRA &= ~(1 << ADPS0);
+    ADCSRA |= (1 << ADPS1);
+    ADCSRA &= ~(1 << ADPS2);
+  } else if (divisor == 8) {
+    ADCSRA |= (1 << ADPS0);
+    ADCSRA |= (1 << ADPS1);
+    ADCSRA &= ~(1 << ADPS2);
+  } else if (divisor == 16) {
+    ADCSRA &= ~(1 << ADPS0);
+    ADCSRA &= ~(1 << ADPS1);
+    ADCSRA |= (1 << ADPS2);
+  } else if (divisor == 32) {
+    ADCSRA |= (1 << ADPS0);
+    ADCSRA &= ~(1 << ADPS1);
+    ADCSRA |= (1 << ADPS2);
+  } else if (divisor == 64) {
+    ADCSRA &= ~(1 << ADPS0);
+    ADCSRA |= (1 << ADPS1);
+    ADCSRA |= (1 << ADPS2);
+  } else if (divisor == 128) {
+    ADCSRA |= (1 << ADPS0);
+    ADCSRA |= (1 << ADPS1);
+    ADCSRA |= (1 << ADPS2);
+  } else if (divisor == 256) {
+    ADCSRA &= ~(1 << ADPS0);
+    ADCSRA &= ~(1 << ADPS1);
+    ADCSRA &= ~(1 << ADPS2);
+  }
 }
 
-uint16_t ADC::read(uint8_t channel) {
-    // Set the ADC channel
-    ADMUX = (ADMUX & ~0x1F) | (channel & 0x1F);
-
-    // Start the conversion
-    ADCSRA |= _BV(ADSC);
-
-    // Wait for the conversion to complete
-    while (ADCSRA & _BV(ADSC)) {}
-
-    // Return the result
-    return ADC;
-}
+void ADC::start(uint8_t channel) {
+  // Starts a conversion on the specified channel
+  ADMUX = (ADMUX & 0xF0) | (channel & 0x0F);
+  ADCSRA
