@@ -65,4 +65,29 @@ void ADC::setClockDivisor(uint8_t divisor) {
 void ADC::start(uint8_t channel) {
   // Starts a conversion on the specified channel
   ADMUX = (ADMUX & 0xF0) | (channel & 0x0F);
-  ADCSRA
+  ADCSRA |= (1 << ADSC);
+}
+
+bool ADC::isConverting() {
+  // Returns true if a conversion is currently in progress
+  return bitRead(ADCSRA, ADSC);
+}
+
+bool ADC::isEnd() {
+  // Returns true if a conversion is complete and the value is ready to be read
+  return bitRead(ADCSRA, ADIF);
+}
+
+uint16_t ADC::getResult() {
+  // Gets the result of the last conversion as a raw integer value
+  while (isConverting());
+  return ADC;
+}
+
+float ADC::getVoltage() {
+  // Gets the result of the last conversion as a voltage value (in millivolts)
+  uint16_t raw = getResult();
+  float voltage = raw * ADC_REF_VOLTAGE / ADC_MAX_VALUE;
+  return voltage;
+}
+
