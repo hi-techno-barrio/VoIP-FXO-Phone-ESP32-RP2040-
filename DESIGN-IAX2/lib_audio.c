@@ -1,6 +1,11 @@
 #include "audio.h"
 #include <math.h>
+#include <ADC.h>
 
+Codec* AudioProcessing::audioCodec;
+uint8_t* AudioProcessing::audioBuffer;
+
+int AudioProcessing::audioBufferSize;
 void AudioProcessing::filter(uint8_t *input, uint8_t *output, int inputSize, int outputSize) {
   // Implement a simple low-pass filter
   float alpha = 0.2;
@@ -13,6 +18,18 @@ void AudioProcessing::filter(uint8_t *input, uint8_t *output, int inputSize, int
     output[i] = sample & 0xFF;
     output[i+1] = (sample >> 8) & 0xFF;
   }
+}
+void AudioProcessing::setCodec(Codec *codec) {
+  audioCodec = codec;
+}
+
+void AudioProcessing::beginRecord(uint8_t *buffer, int bufferSize) {
+  audioBuffer = buffer;
+  audioBufferSize = bufferSize;
+
+  ADC.begin();
+  ADC.setClockDivisor(ADC_CLOCK_DIV_8);
+  ADC.setResolution(8);
 }
 
 void AudioProcessing::amplify(uint8_t *input, uint8_t *output, int inputSize, int outputSize, float gain) {
