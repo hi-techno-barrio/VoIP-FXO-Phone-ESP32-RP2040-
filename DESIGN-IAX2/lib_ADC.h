@@ -22,12 +22,23 @@ typedef enum {
     ADC_CLOCK_DIV_128
 } adc_clock_div_t;
 
+// Define the ADC reference voltage in millivolts
+#define ADC_REF_VOLTAGE 3300
+
 class ADC {
   public:
     static void begin();
-    static void setResolution(adc_resolution_t resolution);
-    static void setClockDivisor(adc_clock_div_t clockDivisor);
-    static uint16_t read(uint8_t channel);
+    static void setResolution(uint8_t bits);
+    static void setClockDivisor(uint8_t divisor);
+    static void start(uint8_t channel);
+    static bool isConverting();
+    static bool isEnd();
+    static uint16_t getResult();
+    static float getVoltage();
+  private:
+    static uint8_t adcResolution;
+    static uint8_t adcClockDivisor;
 };
 
 #endif
+
